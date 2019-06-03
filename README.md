@@ -25,7 +25,6 @@ Please, provides thoses variables in your playbook
 | {{ tick_influxdb_data_nfs_path }}      | STRING: provide full nfs path       | /share/swarm/influxdb/data |
 | {{ tick_kapacitor_config_nfs_path }}      | STRING: provide full nfs path       | /share/swarm/kapacitor/config |
 | {{ tick_influxdb_config_nfs_path }}      | STRING: provide full nfs path       | /share/swarm/influxdb/config |
-| {{ grafana_config_nfs_path }}      | STRING: provide full nfs path | /share/swarm/grafana/config |
 | {{ tick_nfs_server }}      | STRING: provide IP/hostanme | 192.168.0.2 |
 | {{ grafana_dashboards_nfs_path }}      | STRING: provide full nfs path | /share/swarm/grafana/dashboards |
 
