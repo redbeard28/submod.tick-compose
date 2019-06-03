@@ -1,0 +1,98 @@
+version: '3.4'
+services:
+  # FRONT
+  chronograf:
+    # Full tag list: https://hub.docker.com/r/library/chronograf/tags/
+    image: chronograf
+    deploy:
+      replicas: {{ tick_chronograf_deploy_replica }}
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - type: volume
+        source: chronograf-data
+        target: /var/lib/chronograf
+        volume:
+          nocopy: true
+    ports:
+      # The WebUI for Chronograf is served on port 8888
+      - "{{ tick_chronograf_port }}:8888"
+  # MIDDLE
+  kapacitor:
+    # Full tag list: https://hub.docker.com/r/library/kapacitor/tags/
+    image: kapacitor
+    deploy:
+      replicas: {{ tick_kapacitor_deploy_replica }}
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - type: volume
+        source: kapacitor-data
+        target: /var/lib/kapacitor
+        volume:
+          nocopy: true
+      - type: volume
+        source: kapacitor-config
+        target: /etc/kapacitor
+        volume:
+          nocopy: true
+    ports:
+      # The API for Kapacitor is served on port 9092
+      - "{{ tick_kapacitor_port }}:9092"
+  # BACK 
+  # DATABASE
+  influxdb:
+    # Full tag list: https://hub.docker.com/r/library/influxdb/tags/
+    image: influxdb
+    deploy:
+      replicas: {{ tick_influxdb_deploy_replica }}
+      placement:
+        constraints:
+          - node.role != managera
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - type: volume
+        source: influxdb-data
+        target: /var/lib/influxdb
+        volume:
+          nocopy: true
+      - type: volume
+        source: influxdb-config
+        target: /etc/influxdb
+        volume:
+          nocopy: true
+    ports:
+      # The API for InfluxDB is served on port 8086
+      - "{{ tick_influxdb_porth }}:8086"
+
+volumes:
+  chronograf-data:
+    driver_opts:
+      type: "nfs"
+      o: "addr={{ tick_nfs_server }},nolock,soft,rw"
+      device: ":{{ tick_chronograf_data_nfs_path }}"
+  kapacitor-data:
+    driver_opts:
+      type: "nfs"
+      o: "addr={{ tick_nfs_server }},nolock,soft,rw"
+      device: ":{{ tick_kapacitor_data_nfs_path }}"
+  kapacitor-config:
+    driver_opts:
+      type: "nfs"
+      o: "addr={{ tick_nfs_server }},nolock,soft,rw"
+      device: ":{{ tick_kapacitor_config_nfs_path }}"
+  influxdb-data:
+    driver_opts:
+      type: "nfs"
+      o: "addr={{ tick_nfs_server }},nolock,soft,rw"
+      device: ":{{ tick_influxdb_data_nfs_path }}"
+  influxdb-config:
+    driver_opts:
+      type: "nfs"
+      o: "addr={{ tick_nfs_server }},nolock,soft,rw"
+      device: ":{{ tick_influxdb_config_nfs_path }}"
